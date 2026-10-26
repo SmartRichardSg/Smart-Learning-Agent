@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#19365c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Smart Learning">
+<title>Smart Learning Agent</title>
+<link rel="icon" type="image/png" href="./icon.png">
+<link rel="apple-touch-icon" href="./icon.png">
+<style>
+:root{--navy:#19365c;--blue:#285b8b;--pale:#eef5fb;--ink:#1c2d40;--muted:#526579;--green:#e4f5eb;--line:#d8e3ed}
+*{box-sizing:border-box}
+body{margin:0;background:#f4f7fb;color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;font-size:18px;line-height:1.45}
+header{background:var(--navy);color:white;padding:24px 18px 22px;text-align:center}
+.brand{display:flex;justify-content:center;align-items:center;gap:12px}
+.brand img{width:58px;height:58px;border-radius:14px}
+h1{font-size:clamp(25px,6vw,34px);line-height:1.15;margin:0}
+header p{margin:10px 0 0;color:#e3edf8;font-size:16px}
+main{max-width:760px;margin:0 auto;padding:18px 14px 36px}
+.card{background:white;border:1px solid var(--line);border-radius:18px;padding:20px;margin:0 0 16px;box-shadow:0 3px 12px #17385b0b}
+h2{font-size:23px;margin:0 0 8px;color:var(--navy)}
+p{margin:8px 0}
+.small{font-size:15px;color:var(--muted)}
+button,select,input{font:inherit}
+button{border:0;border-radius:13px;padding:14px 16px;min-height:52px;background:var(--blue);color:white;font-weight:700;cursor:pointer}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #e0a800;outline-offset:2px}
+button.secondary{background:var(--pale);color:var(--navy);border:1px solid #cbdceb}
+button.light{background:white;color:var(--navy);border:1px solid var(--line)}
+button:disabled{opacity:.5;cursor:not-allowed}
+.full{width:100%}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}
+.activity{min-height:92px;text-align:left;background:#f8fbfe;color:var(--ink);border:1px solid var(--line);display:flex;flex-direction:column;justify-content:center;gap:4px}
+.activity strong{font-size:18px}
+.activity span{font-size:14px;font-weight:400;color:var(--muted)}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+.row button{flex:1}
+.pill{display:inline-block;background:var(--pale);color:var(--navy);border-radius:99px;padding:5px 10px;font-size:14px;font-weight:700}
+.progress-track{height:12px;background:#e5edf5;border-radius:99px;overflow:hidden;margin:12px 0 6px}
+.progress-fill{height:100%;width:0;background:#2e8b57;transition:width .2s}
+.lesson-title{font-size:25px;margin:8px 0}
+.answer{display:block;width:100%;text-align:left;margin:9px 0;background:#f8fbfe;color:var(--ink);border:1px solid var(--line)}
+.answer.correct{background:var(--green);border-color:#73b58c}
+.answer.wrong{background:#fff0ef;border-color:#d88a83}
+.notice{padding:12px;border-radius:12px;background:var(--pale);margin-top:12px}
+.hidden{display:none!important}
+.word{padding:12px 0;border-bottom:1px solid var(--line)}
+.word:last-child{border-bottom:0}
+.word b{font-size:23px}
+input[type=text]{width:100%;padding:13px;border:1px solid #b9cbdc;border-radius:10px;margin:8px 0}
+footer{text-align:center;padding:8px 18px 28px;color:var(--muted);font-size:14px}
+@media(max-width:430px){.grid{grid-template-columns:1fr 1fr}.card{padding:17px}.row button{min-width:120px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="./icon.png" alt="Smart Learning Agent icon" width="58" height="58">
+    <h1>Smart Learning Agent</h1>
+  </div>
+  <p>Small Steps. Better Every Day.</p>
+</header>
+<main>
+  <section id="home">
+    <div class="card">
+      <span class="pill">YOUR DAILY LEARNING COACH</span>
+      <h2 style="margin-top:12px">Welcome!</h2>
+      <p id="greeting">Choose one small step for today.</p>
+      <div class="notice" id="recommendation"></div>
+      <button class="full" id="startRecommended" style="margin-top:14px">Start today's recommendation</button>
+    </div>
+    <div class="card">
+      <h2>Choose what to learn</h2>
+      <p class="small">You can follow the recommendation or choose another activity.</p>
+      <div class="grid">
+        <button class="activity" data-activity="japanese"><strong>🇯🇵 Japanese</strong><span>Learn 3 useful words</span></button>
+        <button class="activity" data-activity="memory"><strong>🧠 Memory</strong><span>Practise remembering</span></button>
+        <button class="activity" data-activity="reading"><strong>📚 Reading</strong><span>Understand and recall</span></button>
+        <button class="activity" data-activity="growth"><strong>💡 Self-improvement</strong><span>One practical idea</span></button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Your progress</h2>
+      <p id="progressText">0 lessons completed today</p>
+      <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+      <p class="small" id="streakText">Your learning history is saved on this device.</p>
+      <div class="row">
+        <button class="secondary" id="historyBtn">View history</button>
+        <button class="secondary" id="exportBtn">Export backup</button>
+      </div>
+      <div class="row">
+        <button class="light" id="importBtn">Import backup</button>
+        <button class="light" id="resetBtn">Reset progress</button>
+        <input id="importFile" type="file" accept="application/json,.json" class="hidden">
+      </div>
+    </div>
+    <div class="card">
+      <h2>How to use</h2>
+      <p>1. Start the suggested lesson, or choose an activity.</p>
+      <p>2. Answer at your own pace. You can stop whenever you like.</p>
+      <p>3. Your score is saved in this browser on this device.</p>
+      <p class="small">This free first version uses built-in lessons and simple learning rules. It does not connect to a generative AI model or send your data anywhere.</p>
+    </div>
+  </section>
+
+  <section id="lesson" class="hidden">
+    <div class="card">
+      <button class="light" id="backBtn">← Back to home</button>
+      <p style="margin-top:16px"><span class="pill" id="lessonPill">LESSON</span></p>
+      <h2 id="lessonHeading">Today's lesson</h2>
+      <div id="lessonBody"></div>
+      <div id="feedback" class="notice hidden" role="status" aria-live="polite"></div>
+      <div class="row">
+        <button id="nextBtn" class="full hidden">Continue</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="history" class="hidden">
+    <div class="card">
+      <button class="light" id="historyBackBtn">← Back to home</button>
+      <h2 style="margin-top:16px">Your learning history</h2>
+      <div id="historyBody"></div>
+    </div>
+  </section>
+</main>
+<footer>Smart Learning Agent · Free first version · Your progress stays in this browser</footer>
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const STORE="smartLearningAgent_v1";
+const names={japanese:"Japanese",memory:"Memory",reading:"Reading",growth:"Self-improvement"};
+const icons={japanese:"🇯🇵",memory:"🧠",reading:"📚",growth:"💡"};
+const today=()=>new Date().toLocaleDateString("en-CA");
+let data=loadData(),current=null,step=0,score=0,answered=false,lessonCount=0;
+function loadData(){try{return JSON.parse(localStorage.getItem(STORE))||{sessions:[],completedByDate:{},lastActivity:null}}catch(e){return {sessions:[],completedByDate:{},lastActivity:null}}}
+function save(){try{localStorage.setItem(STORE,JSON.stringify(data))}catch(e){alert("Your browser could not save this data. Please export a backup.")}renderProgress()}
+function show(which){["home","lesson","history"].forEach(x=>$(x).classList.toggle("hidden",x!==which));window.scrollTo({top:0,behavior:"smooth"})}
+function recommendation(){
+ const order=["japanese","memory","reading","growth"];
+ const dayNum=Math.floor(Date.now()/86400000);
+ const completed=data.completedByDate[today()]||[];
+ return order.find(x=>!completed.includes(x))||order[dayNum%order.length];
+}
+function renderHome(){
+ const r=recommendation();
+ $("recommendation").innerHTML="<strong>"+icons[r]+" Today's suggestion: "+names[r]+"</strong><br>"+({japanese:"Learn three useful Japanese words.",memory:"Try a short recall exercise.",reading:"Read a short passage and check your understanding.",growth:"Practise one useful self-improvement habit."}[r]);
+ $("startRecommended").dataset.activity=r;
+ $("greeting").textContent=new Date().getHours()<12?"Good morning! Choose one small step for today.":new Date().getHours()<18?"Good afternoon! A few minutes of practice is enough.":"Good evening! Let's finish with one small learning step.";
+ renderProgress();
+}
+function renderProgress(){
+ const done=data.completedByDate[today()]||[];
+ $("progressText").textContent=done.length+" of 4 activities completed today";
+ $("progressFill").style.width=(done.length/4*100)+"%";
+ const days=new Set(data.sessions.map(s=>s.date));
+ $("streakText").textContent=data.sessions.length+" lessons recorded across "+days.size+" learning day(s). Progress is saved on this device.";
+}
+const lessons={
+ japanese:[
+  {type:"words",title:"Three useful Japanese words",items:[
+   {jp:"こんにちは",romaji:"konnichiwa",en:"hello / good afternoon"},
+   {jp:"ありがとう",romaji:"arigatou",en:"thank you"},
+   {jp:"すみません",romaji:"sumimasen",en:"excuse me / sorry"}
+  ],question:"Which phrase means “thank you”?",options:["こんにちは","ありがとう","すみません"],answer:1,explain:"ありがとう (arigatou) means “thank you”."},
+  {type:"words",title:"Everyday Japanese",items:[
+   {jp:"はい",romaji:"hai",en:"yes"},
+   {jp:"いいえ",romaji:"iie",en:"no"},
+   {jp:"お願いします",romaji:"onegaishimasu",en:"please"}
+  ],question:"Which word means “yes”?",options:["いいえ","はい","ありがとう"],answer:1,explain:"はい (hai) means “yes”."},
+  {type:"words",title:"Useful greetings",items:[
+   {jp:"おはよう",romaji:"ohayou",en:"good morning (casual)"},
+   {jp:"こんばんは",romaji:"konbanwa",en:"good evening"},
+   {jp:"おやすみ",romaji:"oyasumi",en:"good night (casual)"}
+  ],question:"Which phrase means “good evening”?",options:["おやすみ","おはよう","こんばんは"],answer:2,explain:"こんばんは (konbanwa) means “good evening”."}
+ ],
+ memory:[
+  {title:"Remember three items",kind:"memory",items:["🍎 Apple","🔑 Key","🌸 Flower"],question:"Which item appeared in the list?",options:["A spoon","A key","A shoe"],answer:1,explain:"The list included a key. Try making a mental picture to help remember items."},
+  {title:"Remember the order",kind:"memory",items:["1. Blue","2. Green","3. Red"],question:"What was the second colour?",options:["Red","Blue","Green"],answer:2,explain:"Green was second. Grouping information in order can help recall."},
+  {title:"Remember the numbers",kind:"memory",items:["7 · 2 · 9"],question:"Which number was in the middle?",options:["7","9","2"],answer:2,explain:"The number in the middle was 2. You can repeat a short sequence quietly to remember it."}
+ ],
+ reading:[
+  {title:"A small daily habit",passage:"A man wanted to read more books. He began by reading just five pages each morning. After a month, reading felt easier, and he had finished several chapters. His progress came from a small action repeated regularly.",question:"What helped the man make progress?",options:["Reading a whole book in one day","Reading five pages regularly","Waiting until he had more free time"],answer:1,explain:"A small action repeated regularly helped him make progress."},
+  {title:"Learning from mistakes",passage:"When Mei made a mistake while learning a new skill, she wrote down what happened and tried a different method. Over time, she became more confident because each mistake gave her useful information.",question:"How did Mei use her mistakes?",options:["She ignored them","She stopped learning","She used them to try a different method"],answer:2,explain:"She treated mistakes as information that helped her improve."},
+  {title:"Taking a useful break",passage:"After practising for twenty minutes, Daniel stood up, stretched gently and rested his eyes. When he returned to his task, he felt ready to concentrate again.",question:"What did Daniel do during his break?",options:["He stretched gently and rested his eyes","He worked without stopping","He started a new difficult task"],answer:0,explain:"He took a short break, moved gently and rested his eyes."}
+ ],
+ growth:[
+  {title:"One small improvement",passage:"Choose one everyday activity you would like to make easier. Instead of changing everything, identify one tiny step you can repeat tomorrow. Small steps are easier to maintain than a large plan that feels overwhelming.",question:"What is the main idea?",options:["Change everything at once","Choose one small repeatable step","Wait for motivation before starting"],answer:1,explain:"One small, repeatable action can make improvement easier to sustain."},
+  {title:"Listen before responding",passage:"In a conversation, try listening until the other person finishes. Pause for a moment, then summarise what you understood before giving your opinion. This can reduce misunderstandings.",question:"What should you do before giving your opinion?",options:["Interrupt quickly","Change the subject","Summarise what you understood"],answer:2,explain:"Summarising what you heard helps check your understanding."},
+  {title:"Notice what works",passage:"At the end of the day, think of one thing that went well and ask why it worked. This helps you notice useful habits that you can repeat in the future.",question:"What question can help you learn from success?",options:["Why did it work?","How can I avoid trying again?","Why must everything be perfect?"],answer:0,explain:"Asking why something worked helps you identify a habit to repeat."}
+ ]
+};
+function startActivity(activity){
+ current=activity;step=0;score=0;answered=false;lessonCount=0;
+ $("lessonPill").textContent=icons[activity]+" "+names[activity].toUpperCase();
+ $("lessonHeading").textContent=names[activity]+" practice";
+ $("feedback").classList.add("hidden");$("nextBtn").classList.add("hidden");
+ show("lesson");renderStep();
+}
+function renderStep(){
+ const arr=lessons[current],item=arr[(Math.floor(Date.now()/86400000)+step)%arr.length];
+ currentItem=item;answered=false;
+ let html="";
+ if(item.items&&current==="japanese"){
+  html+="<p>Read each word aloud if you can.</p>";
+  item.items.forEach(w=>html+='<div class="word"><b>'+w.jp+'</b><br><strong>'+w.romaji+'</strong><br><span>'+w.en+'</span></div>');
+ }else if(item.items){
+  html+="<p>Study these items for a moment. Then answer the question.</p><div class='notice' style='font-size:22px;text-align:center'>"+item.items.join("<br>")+"</div>";
+ }else{
+  if(item.passage)html+='<p>'+item.passage+'</p>';
+ }
+ html+='<h3 style="font-size:20px;margin-top:20px">'+item.question+'</h3>';
+ item.options.forEach((op,i)=>html+='<button class="answer" data-answer="'+i+'">'+String.fromCharCode(65+i)+'. '+op+'</button>');
+ $("lessonBody").innerHTML=html;
+ $("feedback").classList.add("hidden");$("nextBtn").classList.add("hidden");
+ $("lessonBody").querySelectorAll("[data-answer]").forEach(btn=>btn.addEventListener("click",()=>answer(Number(btn.dataset.answer),btn)));
+}
+let currentItem;
+function answer(n,btn){
+ if(answered)return;answered=true;
+ const buttons=$("lessonBody").querySelectorAll("[data-answer]");
+ buttons.forEach(b=>b.disabled=true);
+ const ok=n===currentItem.answer;if(ok)score++;
+ btn.classList.add(ok?"correct":"wrong");
+ buttons[currentItem.answer].classList.add("correct");
+ $("feedback").textContent=(ok?"Correct! ":"Not quite. ")+currentItem.explain;
+ $("feedback").classList.remove("hidden");
+ $("nextBtn").textContent=step<0?"Continue":"Finish lesson";
+ $("nextBtn").classList.remove("hidden");
+}
+$("nextBtn").addEventListener("click",finishLesson);
+function finishLesson(){
+ const session={date:today(),activity:current,score:score,total:1,title:currentItem.title||names[current]};
+ data.sessions.push(session);data.completedByDate[today()]=data.completedByDate[today()]||[];
+ if(!data.completedByDate[today()].includes(current))data.completedByDate[today()].push(current);
+ data.lastActivity=current;save();
+ $("lessonHeading").textContent="Well done!";
+ $("lessonBody").innerHTML="<div class='notice'><h3>Your result: "+score+" out of 1</h3><p>"+(score===1?"You answered correctly. Keep practising to strengthen recall.":"Review the explanation, then try again another day.")+"</p><p>Your learning record has been saved on this device.</p></div><button class='full' id='anotherBtn'>Try another activity</button>";
+ $("feedback").classList.add("hidden");$("nextBtn").classList.add("hidden");
+ $("anotherBtn").addEventListener("click",()=>{renderHome();show("home")});
+}
+document.querySelectorAll("[data-activity]").forEach(b=>b.addEventListener("click",()=>startActivity(b.dataset.activity)));
+$("startRecommended").addEventListener("click",()=>startActivity($("startRecommended").dataset.activity));
+$("backBtn").addEventListener("click",()=>{renderHome();show("home")});
+$("historyBackBtn").addEventListener("click",()=>{renderHome();show("home")});
+$("historyBtn").addEventListener("click",()=>{
+ const sessions=[...data.sessions].reverse();
+ $("historyBody").innerHTML=sessions.length?sessions.map(s=>'<div class="word"><strong>'+s.date+' · '+icons[s.activity]+' '+names[s.activity]+'</strong><br>'+s.title+' — score '+s.score+'/'+s.total+'</div>').join(""):"<p>No lessons completed yet. Start your first lesson today!</p>";
+ show("history");
+});
+$("exportBtn").addEventListener("click",()=>{
+ const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
+ const url=URL.createObjectURL(blob),a=document.createElement("a");
+ a.href=url;a.download="smart-learning-backup.json";a.click();URL.revokeObjectURL(url);
+});
+$("importBtn").addEventListener("click",()=>$("importFile").click());
+$("importFile").addEventListener("change",async e=>{
+ const file=e.target.files[0];if(!file)return;
+ try{const imported=JSON.parse(await file.text());if(!Array.isArray(imported.sessions)||typeof imported.completedByDate!=="object")throw new Error("Invalid backup");
+ if(confirm("Replace current learning records with the selected backup?")){data=imported;save();renderHome();alert("Backup imported successfully.");}
+ }catch(err){alert("That file does not look like a valid Smart Learning backup.");}
+ e.target.value="";
+});
+$("resetBtn").addEventListener("click",()=>{
+ if(confirm("Delete all learning records from this browser? Export a backup first if you want to keep them.")){data={sessions:[],completedByDate:{},lastActivity:null};save();renderHome();alert("Learning records reset.");}
+});
+renderHome();
+})();
+</script>
+</body>
+</html>
